@@ -1,7 +1,5 @@
 package com.example.urlshortener.config;
 
-import com.example.urlshortener.repository.UrlRepository;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
@@ -11,8 +9,8 @@ import javax.persistence.Persistence;
 
 /**
  * Cria a {@link EntityManagerFactory} da persistence unit RESOURCE_LOCAL
- * (H2 em memória, sem datasource gerenciado pelo WildFly) e expõe o
- * {@link UrlRepository} para injeção CDI.
+ * (H2 em memória, sem datasource gerenciado pelo WildFly) e a expõe para
+ * injeção CDI.
  */
 @ApplicationScoped
 public class PersistenceBootstrap {
@@ -33,7 +31,7 @@ public class PersistenceBootstrap {
 
     @Produces
     @ApplicationScoped
-    public UrlRepository produceUrlRepository() {
-        return new UrlRepository(emf);
+    public EntityManagerFactory produceEntityManagerFactory() {
+        return emf;
     }
 }
