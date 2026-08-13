@@ -23,6 +23,10 @@ public class UrlShortenerService {
     private final CodeGenerator codeGenerator;
     private final UrlValidator validator;
 
+    protected UrlShortenerService() {
+        this(null, null, null);
+    }
+
     @Inject
     public UrlShortenerService(UrlRepository repository, CodeGenerator codeGenerator, UrlValidator validator) {
         this.repository = repository;

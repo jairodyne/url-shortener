@@ -2,6 +2,8 @@ package com.example.urlshortener.repository;
 
 import com.example.urlshortener.model.UrlEntity;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -13,10 +15,16 @@ import java.util.Optional;
  * {@link EntityManager} e controla a transação (persistence unit RESOURCE_LOCAL),
  * o que mantém a classe testável sem container.
  */
+@ApplicationScoped
 public class UrlRepository {
 
     private final EntityManagerFactory emf;
 
+    protected UrlRepository() {
+        this(null);
+    }
+
+    @Inject
     public UrlRepository(EntityManagerFactory emf) {
         this.emf = emf;
     }
