@@ -42,16 +42,25 @@ public class UrlRepository {
     public Optional<UrlEntity> findByCode(String code) {
         EntityManager em = emf.createEntityManager();
         try {
-            return Optional.ofNullable(findByQuery("code", code, em));
+            return Optional.ofNullable(
+                    em.createQuery("select u from UrlEntity u where u.code = :code", UrlEntity.class)
+                            .setParameter("code", code)
+                            .getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
         } finally {
             em.close();
         }
     }
 
-    public Optional<UrlEntity> findByAlias(String alias) {
+    public boolean existsByCode(String code) {
         EntityManager em = emf.createEntityManager();
         try {
-            return Optional.ofNullable(findByQuery("alias", alias, em));
+            Long count = em.createQuery(
+                            "select count(u) from UrlEntity u where u.code = :code", Long.class)
+                    .setParameter("code", code)
+                    .getSingleResult();
+            return count > 0;
         } finally {
             em.close();
         }
@@ -73,17 +82,6 @@ public class UrlRepository {
             throw e;
         } finally {
             em.close();
-        }
-    }
-
-    private UrlEntity findByQuery(String field, String value, EntityManager em) {
-        try {
-            return em.createQuery(
-                            "select u from UrlEntity u where u." + field + " = :value", UrlEntity.class)
-                    .setParameter("value", value)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            return null;
         }
     }
 }

@@ -11,8 +11,7 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(name = "urls",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_urls_code", columnNames = "code"),
-                @UniqueConstraint(name = "uk_urls_alias", columnNames = "alias")
+                @UniqueConstraint(name = "uk_urls_code", columnNames = "code")
         })
 public class UrlEntity {
 
@@ -20,11 +19,8 @@ public class UrlEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "code", nullable = false, unique = true, length = 10)
+    @Column(name = "code", nullable = false, unique = true, length = 30)
     private String code;
-
-    @Column(name = "alias", unique = true, length = 30)
-    private String alias;
 
     @Column(name = "original_url", nullable = false, length = 2048)
     private String originalUrl;
@@ -38,9 +34,8 @@ public class UrlEntity {
     protected UrlEntity() {
     }
 
-    public UrlEntity(String code, String alias, String originalUrl, long createdAt) {
+    public UrlEntity(String code, String originalUrl, long createdAt) {
         this.code = code;
-        this.alias = alias;
         this.originalUrl = originalUrl;
         this.createdAt = createdAt;
         this.clickCount = 0;
@@ -54,10 +49,6 @@ public class UrlEntity {
         return code;
     }
 
-    public String getAlias() {
-        return alias;
-    }
-
     public String getOriginalUrl() {
         return originalUrl;
     }
@@ -68,9 +59,5 @@ public class UrlEntity {
 
     public long getClickCount() {
         return clickCount;
-    }
-
-    public void setClickCount(long clickCount) {
-        this.clickCount = clickCount;
     }
 }
