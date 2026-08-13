@@ -42,9 +42,9 @@ public class UrlRepositoryTest {
 
     @Test
     public void savesAndFindsByCode() {
-        UrlEntity saved = repository.save(url("abc123", null, "https://example.com"));
+        UrlEntity saved = repository.save(url("abc123", "https://example.com"));
 
-        Optional<UrlEntity> found = repository.findByCode(saved.getCode());
+        Optional<UrlEntity> found = repository.findByCode("abc123");
 
         assertTrue(found.isPresent());
         assertEquals("https://example.com", found.get().getOriginalUrl());
@@ -52,33 +52,24 @@ public class UrlRepositoryTest {
     }
 
     @Test
-    public void findsByAlias() {
-        repository.save(url("abc123", "meu-alias", "https://example.com"));
-
-        Optional<UrlEntity> found = repository.findByAlias("meu-alias");
-
-        assertTrue(found.isPresent());
-        assertEquals("abc123", found.get().getCode());
-    }
-
-    @Test
     public void returnsEmptyWhenNotFound() {
         assertFalse(repository.findByCode("nao-existe").isPresent());
-        assertFalse(repository.findByAlias("nao-existe").isPresent());
-    }
-
-    @Test(expected = PersistenceException.class)
-    public void rejectsDuplicateCode() {
-        repository.save(url("abc123", null, "https://a.com"));
-        repository.save(url("abc123", "outro", "https://b.com"));
+        assertFalse(repository.existsByCode("nao-existe"));
     }
 
     @Test
-    public void rejectsDuplicateAlias() {
-        repository.save(url("abc123", "ocupado", "https://a.com"));
+    public void reportsExistenceByCode() {
+        repository.save(url("abc123", "https://example.com"));
+
+        assertTrue(repository.existsByCode("abc123"));
+    }
+
+    @Test
+    public void rejectsDuplicateCode() {
+        repository.save(url("abc123", "https://a.com"));
         try {
-            repository.save(url("def456", "ocupado", "https://b.com"));
-            fail("duplicidade de alias deveria violar a constraint UNIQUE");
+            repository.save(url("abc123", "https://b.com"));
+            fail("duplicidade de code deveria violar a constraint UNIQUE");
         } catch (PersistenceException expected) {
             assertTrue(expected.getCause() != null);
         }
@@ -86,15 +77,15 @@ public class UrlRepositoryTest {
 
     @Test
     public void incrementsClickCount() {
-        UrlEntity saved = repository.save(url("abc123", null, "https://example.com"));
+        UrlEntity saved = repository.save(url("abc123", "https://example.com"));
 
         repository.incrementClicks(saved.getCode());
         repository.incrementClicks(saved.getCode());
 
-        assertEquals(2, repository.findByCode(saved.getCode()).get().getClickCount());
+        assertEquals(2, repository.findByCode("abc123").get().getClickCount());
     }
 
-    private static UrlEntity url(String code, String alias, String original) {
-        return new UrlEntity(code, alias, original, System.currentTimeMillis());
+    private static UrlEntity url(String code, String original) {
+        return new UrlEntity(code, original, System.currentTimeMillis());
     }
 }
