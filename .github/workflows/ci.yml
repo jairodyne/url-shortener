@@ -1,0 +1,52 @@
+name: build-and-test
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Unit tests
+        run: mvn -q test
+
+      - name: Package WAR with frontend
+        run: mvn -q package
+
+      - name: Build Docker image
+        run: docker build -t url-shortener .
+
+      - name: Start WildFly container
+        run: docker run -d --name url-shortener -p 8080:8080 url-shortener
+
+      - name: Smoke test
+        run: bash scripts/smoke.sh http://localhost:8080/url-shortener
+
+      - name: Integration tests (REST)
+        run: mvn -q failsafe:integration-test failsafe:verify -Dit.baseUrl=http://localhost:8080/url-shortener
