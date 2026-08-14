@@ -22,6 +22,8 @@ import java.io.IOException;
 @WebServlet(name = "RedirectServlet", urlPatterns = "/r/*")
 public class RedirectServlet extends HttpServlet {
 
+    private static final long serialVersionUID = 1L;
+
     @Inject
     private UrlShortenerService service;
 
